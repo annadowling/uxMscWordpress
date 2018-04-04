@@ -4,7 +4,7 @@ Donate link: http://www.gowebsolutions.com/wp-customer-reviews/
 Tags: business, google, hcard, schema.org, hproduct, hreview, microformat, microformats, mu, places, plugin, product, rating, ratings, rdfa, review, review box, review widget, reviews, seo, service, snippet, snippets, testimonial, testimonials, widget, wordpressmu, wpmu
 Requires at least: 3.0.0
 Tested up to: 4.9
-Stable tag: 3.1.5
+Stable tag: 3.1.9
 License: MIT
 License URI: http://opensource.org/licenses/MIT
 
@@ -63,6 +63,24 @@ More information at: [**WP Customer Reviews**](http://www.gowebsolutions.com/wp-
 * [**Community Support Forum**](http://wordpress.org/tags/wp-customer-reviews?forum_id=10)
 
 == Changelog ==
+
+= 3.1.9 =
+* 04/03/2018
+* [Update] Allow HIDEREVIEWS=0 to be used in shortcode without needing the (unreleased) Pro version
+* [Bugfix] Fixed an invalid CSS important rule on a label, making it valid and as intended.
+
+= 3.1.8 =
+* 03/30/2018
+* [Bugfix] Compatibility with PHP 4.3+, apparently people still use PHP 4.3.x and 4.4.x
+
+= 3.1.7 =
+* 03/27/2018
+* [Bugfix] To prevent conflicts with other plugins, we renamed our usage of select2 to wpcr3_select2, and are loading it locally instead of via a CDN.
+
+= 3.1.6 =
+* 03/24/2018
+* [Update] Significant performance improvements when logged in or using WP admin. Blogs with many review-enabled posts should notice significantly faster page load times.
+* [Bugfix] "Enable WP Customer Reviews for this page" form should now properly initialize when adding new posts. Previously, it only worked properly on existing posts.
 
 = 3.1.5 =
 * 11/16/2017

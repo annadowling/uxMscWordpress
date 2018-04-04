@@ -3,7 +3,7 @@
  * Plugin Name: WP Customer Reviews
  * Plugin URI: http://www.gowebsolutions.com/wp-customer-reviews/
  * Description: Allows your visitors to leave business / product reviews. Testimonials are in Microdata / Microformat and may display star ratings in search results.
- * Version: 3.1.5
+ * Version: 3.1.9
  * Author: Go Web Solutions
  * Author URI: http://www.gowebsolutions.com/
  * Text Domain: wp-customer-reviews
@@ -104,6 +104,9 @@ class WPCustomerReviews3 {
 			$pro_file = $this->getplugindir() . '../wp-customer-reviews-pro-activation/wp-customer-reviews-3-pro-inc.php';
 			$pro_exists = file_exists($pro_file);
 			if ($pro_exists === false) { return; }
+
+			include_once( ABSPATH . 'wp-admin/includes/plugin.php');
+			if (is_plugin_active("wp-customer-reviews-pro-activation/wp-customer-reviews-3-pro.php") === false) { return; }
 			
 			define('HAS_'.$this->prefix.'_PRO', 1);
 			include_once($pro_file); // include pro functions
@@ -479,7 +482,7 @@ class WPCustomerReviews3 {
 		if ($opts->perpage < 1) { $opts->perpage = intval($this->options['reviews_per_page']); }
 		
 		$postid = $opts->postid;
-        	$thispage = $opts->thispage;
+        $thispage = $opts->thispage;
 		
 		if ($opts->num > 0 && $opts->num < $opts->perpage) {
 			$opts->perpage = $opts->num;
@@ -508,6 +511,7 @@ class WPCustomerReviews3 {
 			'review_form' => '',
 			'reviews' => '',
 			'power' => '',
+			'hidereviews' => ($opts->hidereviews == 1),
 			'ajaxurl' => $ajaxurl_arr,
 			'postid' => $postid,
 			'on_postid' => $on_postid
@@ -519,7 +523,7 @@ class WPCustomerReviews3 {
 		
 		$pagination = "";
 		if ($opts->hidereviews == 0) {
-			if ($found_posts > $opts->perpage && $opts->paginate === 1) {				
+			if ($found_posts > $opts->perpage && $opts->paginate === 1) {
 				$pagination = $this->pagination($opts, $thispage, $found_posts);
 				$pagination = wpcr_Goatee::fill($this->options['templates']['frontend_review_pagination'], $pagination);
 			}
@@ -559,10 +563,6 @@ class WPCustomerReviews3 {
 					'aggregate' => $this->get_aggregate_reviews($postid)
 				)
 			);
-			
-			if ($this->pro) {
-				$data = $this->pro_function('shortcode_hidereviews', $opts, $data);
-			}
 			
 			$main_data['reviews'] .= wpcr_Goatee::fill($this->options['templates']['frontend_review_item'], $data);
 		} else {
@@ -998,7 +998,7 @@ class WPCustomerReviews3 {
     
     function shortcode_insert() {
         $this->force_active_page = 'shortcode_insert';
-        return $this->do_the_content('', 'shortcode_insert');        
+        return $this->do_the_content('', 'shortcode_insert');
     }
 	
 	function strip_trim($val) {

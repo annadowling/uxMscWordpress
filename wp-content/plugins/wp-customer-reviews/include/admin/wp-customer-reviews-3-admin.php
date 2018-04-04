@@ -113,6 +113,9 @@ class WPCustomerReviewsAdmin3 extends WPCustomerReviews3
 		add_action('manage_'.$this->prefix.'_review_posts_custom_column', array(&$this, 'admin_custom_review_column'), 10, 2); // 2 arguments
 		add_action('restrict_manage_posts', array(&$this, 'review_filter_list'));
 		add_action('load-edit.php', array(&$this, 'load_custom_filter'));
+		add_action('add_meta_boxes', array(&$this, 'my_add_meta_box'), 10, 2); // 2 arguments
+
+		add_action('wp_ajax_'.$this->prefix.'_enabled_posts', array(&$this, 'ajax_enabled_posts'));
 		
 		add_filter('manage_edit-'.$this->prefix.'_review_columns', array(&$this, 'admin_filter_custom_review_columns') );
 		add_filter('plugin_action_links_'.plugin_basename(__FILE__), array(&$this, 'plugin_settings_link'));
@@ -121,7 +124,6 @@ class WPCustomerReviewsAdmin3 extends WPCustomerReviews3
 		add_filter('request', array(&$this, 'review_sortable_columns_orderby'));
 		
 		$this->enqueue_admin_stuff();
-		$this->my_add_meta_box();
 		
 		$params = array('action');
 		$this->param($params);
@@ -149,7 +151,7 @@ class WPCustomerReviewsAdmin3 extends WPCustomerReviews3
 	
 	function post_activate() {
 		if ($this->pro !== true) {
-			unset($this->options['templates']);			
+			unset($this->options['templates']);
 			update_option($this->options_name, $this->options);
 		}
 		
@@ -490,222 +492,256 @@ class WPCustomerReviewsAdmin3 extends WPCustomerReviews3
 		}
 		return $messages;
 	}
-	
-	function my_add_meta_box() {		
-		$this->meta_box_posts = array(
-			'id' => $this->prefix.'-meta-box',
-			'title' => '<img src="'.$this->getpluginurl().'css/star.png" />&nbsp;WP Customer Reviews',
-			'context' => 'normal',
-			'priority' => 'high',
-			'fields' => array(
-				array(
-					'name' => '<span style="font-weight:bold;">Enable WP Customer Reviews</span> for this page',
-					'desc' => 'Reviews will be displayed below your page content by default. To insert reviews in the middle of your post, add [WPCR_INSERT] in the contents where you would like the reviews to be displayed.',
-					'id' => $this->prefix.'_enable',
-					'type' => 'checkbox'
-				),
-				array(
-					'name' => 'Hide review form',
-					'desc' => 'If this option is checked, users will NOT be able to submit reviews.',
-					'id' => $this->prefix.'_hideform',
-					'type' => 'checkbox'
-				),
-				array(
-					'name' => 'Review Format',
-					'desc' => 'Will visitors be reviewing a business or a product?',
-					'id' => $this->prefix.'_format',
-					'type' => 'select',
-					'options' => array(
-						'business' => 'Business',
-						'product' => 'Product'
-					)
-				),
-				
-				array(
-					'name' => 'Business Name',
-					'desc' => '',
-					'id' => $this->prefix.'_business_name',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'Street Address 1',
-					'desc' => '',
-					'id' => $this->prefix.'_business_street1',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'Street Address 2',
-					'desc' => '(optional) Leave blank if this does not apply.',
-					'id' => $this->prefix.'_business_street2',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'City / Locality',
-					'desc' => '',
-					'id' => $this->prefix.'_business_city',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'State / Region',
-					'desc' => 'For USA, use 2 letters such as "CA"',
-					'id' => $this->prefix.'_business_state',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'Postal Code',
-					'desc' => '',
-					'id' => $this->prefix.'_business_zip',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'Country',
-					'desc' => 'Use the 2-letter or 3-letter country code such as "USA"',
-					'id' => $this->prefix.'_business_country',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'Telephone',
-					'desc' => 'Example: 520-555-5555 or (520) 555-5555',
-					'id' => $this->prefix.'_business_phone',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'Website URL',
-					'desc' => 'Example: http://www.gowebsolutions.com/',
-					'id' => $this->prefix.'_business_url',
-					'type' => 'text'
-				),
-				
-				array(
-					'name' => 'Product Name',
-					'desc' => '',
-					'id' => $this->prefix.'_product_name',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'Manufacturer/Brand of Product',
-					'desc' => '',
-					'id' => $this->prefix.'_product_brand',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'Product ID',
-					'desc' => 'ONE of the following formats: <b>asin:1234567890</b>, <b>isbn:1234567890</b>, <b>upc:1234567890123</b> , <b>sku:ABC123</b>, <b>mpn:ABC123</b>',
-					'id' => $this->prefix.'_product_id',
-					'type' => 'text'
-				)
-			)
-		);
-	
-		$args = array('public' => true);
-		if (!is_array($post_types = get_post_types($args))) {
-			$post_types = array();
-		}
 
-		$my_post_type = $this->prefix.'_review';
-		unset($post_types['attachment']);
-		unset($post_types[$my_post_type]);
-		
-		foreach ($post_types as $post_type) {
-			add_meta_box( $this->meta_box_posts['id'], $this->meta_box_posts['title'], array(&$this, 'show_meta_box_fields'), $post_type, $this->meta_box_posts['context'], $this->meta_box_posts['priority'], array('type' => 'meta_box_posts') );
-		}
-		
-		$tmpPosts = $this->get_all_posts_pages(true);
-		$postArr = array('' => '-- Select Post --');
-		foreach ($tmpPosts->posts as $p) {
-			if ($p->post_type === "attachment") { continue; }
-			$postArr[$p->ID] = $p->post_title;
-		}
-		
-		$this->meta_box_reviews = array(
-			'id' => $this->prefix.'-meta-box-reviews',
-			'title' => '<img src="'.$this->getpluginurl().'css/star.png" />&nbsp;Review Details',
-			'context' => 'normal',
-			'priority' => 'high',
-			'fields' => array(
-				array(
-					'name' => 'Reviewed Post',
-					'desc' => '',
-					'id' => $this->prefix.'_review_post',
-					'type' => 'select',
-					'options' => $postArr
-				),
-				array(
-					'name' => 'Reviewer Name',
-					'desc' => '',
-					'id' => $this->prefix.'_review_name',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'Email Address',
-					'desc' => '',
-					'id' => $this->prefix.'_review_email',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'Website',
-					'desc' => '',
-					'id' => $this->prefix.'_review_website',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'Review Title',
-					'desc' => '',
-					'id' => $this->prefix.'_review_title',
-					'type' => 'text'
-				),
-				array(
-					'name' => 'Rating',
-					'desc' => '',
-					'id' => $this->prefix.'_review_rating',
-					'type' => 'select',
-					'options' => array('1' => '1 star','2' => '2 stars','3' => '3 stars','4' => '4 stars','5' => '5 stars')
-				),
-				array(
-					'name' => 'Admin Response to Review',
-					'desc' => '',
-					'id' => $this->prefix.'_review_admin_response',
-					'type' => 'textarea'
-				)
-			)
-		);
-		
-		if (isset($this->options['custom_fields'])) {
-			$i = 0;
-			foreach ($this->options['custom_fields'] as $name => $fieldArr) {
-				$i++;			
-				if ($fieldArr['ask'] == 1 || $fieldArr['show'] == 1) {
-					$this->meta_box_reviews['fields'][] = array(
-						'name' => $fieldArr['label'],
-						'desc' => 'Custom Field #'.$i,
-						'id' => $this->prefix.'_'.$name,
-						'type' => 'text'
-					);
-				}
-			}
-		}
-		
-		// add for reviews
-		add_meta_box( $this->meta_box_reviews['id'], $this->meta_box_reviews['title'], array(&$this, 'show_meta_box_fields'), $this->prefix.'_review', $this->meta_box_reviews['context'], $this->meta_box_reviews['priority'], array('type' => 'meta_box_reviews') );
+	function selected_label_function_500($metaValue) {
+		// metaValue is postID
+		return get_the_title($metaValue);
 	}
 	
-	function get_all_posts_pages($only_plugin_enabled_posts) {
-		$args = array(
-			'post_type' => 'any',
-			'orderby' => 'post_title',
-			'order' => 'asc',
-			'post_status' => 'publish,pending,draft,future,private,trash',
-			'suppress_filters' => false,
-			'nopaging' => true
-		);
+	function my_add_meta_box($post_type, $post) {
+		$my_post_type = $this->prefix.'_review';
+
+		if ($post_type === $my_post_type && count($this->meta_box_reviews) === 0) {
+			$this->meta_box_reviews = array(
+				'id' => $this->prefix.'-meta-box-reviews',
+				'title' => '<img src="'.$this->getpluginurl().'css/star.png" />&nbsp;Review Details',
+				'context' => 'normal',
+				'priority' => 'high',
+				'fields' => array(
+					array(
+						'name' => 'Reviewed Post / Page',
+						'desc' => '',
+						'id' => $this->prefix.'_review_post',
+						'type' => 'select2',
+						'options' => array(), // populated by ajax select2
+						'typeOptions' => array(
+							// passed by name for php4/wp3 support, does not support anonymous functions
+							'selected_label_function' => "selected_label_function_500",
+							'select2' => array(
+								"ajax" => array(
+									"url" => admin_url('admin-ajax.php') . '?action=wpcr3_enabled_posts',
+									"dataType" => 'json',
+									"delay" => 250 // 250ms debounce
+								),
+								"placeholder" => '-- Select Post --',
+								"allowClear" => true
+							)
+						)
+					),
+					array(
+						'name' => 'Reviewer Name',
+						'desc' => '',
+						'id' => $this->prefix.'_review_name',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'Email Address',
+						'desc' => '',
+						'id' => $this->prefix.'_review_email',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'Website',
+						'desc' => '',
+						'id' => $this->prefix.'_review_website',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'Review Title',
+						'desc' => '',
+						'id' => $this->prefix.'_review_title',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'Rating',
+						'desc' => '',
+						'id' => $this->prefix.'_review_rating',
+						'type' => 'select',
+						'options' => array('1' => '1 star','2' => '2 stars','3' => '3 stars','4' => '4 stars','5' => '5 stars')
+					),
+					array(
+						'name' => 'Admin Response to Review',
+						'desc' => '',
+						'id' => $this->prefix.'_review_admin_response',
+						'type' => 'textarea'
+					)
+				)
+			);
+			
+			if (isset($this->options['custom_fields'])) {
+				$i = 0;
+				foreach ($this->options['custom_fields'] as $name => $fieldArr) {
+					$i++;			
+					if ($fieldArr['ask'] == 1 || $fieldArr['show'] == 1) {
+						$this->meta_box_reviews['fields'][] = array(
+							'name' => $fieldArr['label'],
+							'desc' => 'Custom Field #'.$i,
+							'id' => $this->prefix.'_'.$name,
+							'type' => 'text'
+						);
+					}
+				}
+			}
+			
+			// add for reviews
+			add_meta_box( $this->meta_box_reviews['id'], $this->meta_box_reviews['title'], array(&$this, 'show_meta_box_fields'), $this->prefix.'_review', $this->meta_box_reviews['context'], $this->meta_box_reviews['priority'], array('type' => 'meta_box_reviews') );
+		} else if (count($this->meta_box_posts) === 0) {
+			$this->meta_box_posts = array(
+				'id' => $this->prefix.'-meta-box',
+				'title' => '<img src="'.$this->getpluginurl().'css/star.png" />&nbsp;WP Customer Reviews',
+				'context' => 'normal',
+				'priority' => 'high',
+				'fields' => array(
+					array(
+						'name' => '<span style="font-weight:bold;">Enable WP Customer Reviews</span> for this page',
+						'desc' => 'Reviews will be displayed below your page content by default. To insert reviews in the middle of your post, add [WPCR_INSERT] in the contents where you would like the reviews to be displayed.',
+						'id' => $this->prefix.'_enable',
+						'type' => 'checkbox'
+					),
+					array(
+						'name' => 'Hide review form',
+						'desc' => 'If this option is checked, users will NOT be able to submit reviews.',
+						'id' => $this->prefix.'_hideform',
+						'type' => 'checkbox'
+					),
+					array(
+						'name' => 'Review Format',
+						'desc' => 'Will visitors be reviewing a business or a product?',
+						'id' => $this->prefix.'_format',
+						'type' => 'select',
+						'options' => array(
+							'business' => 'Business',
+							'product' => 'Product'
+						)
+					),
+					
+					array(
+						'name' => 'Business Name',
+						'desc' => '',
+						'id' => $this->prefix.'_business_name',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'Street Address 1',
+						'desc' => '',
+						'id' => $this->prefix.'_business_street1',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'Street Address 2',
+						'desc' => '(optional) Leave blank if this does not apply.',
+						'id' => $this->prefix.'_business_street2',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'City / Locality',
+						'desc' => '',
+						'id' => $this->prefix.'_business_city',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'State / Region',
+						'desc' => 'For USA, use 2 letters such as "CA"',
+						'id' => $this->prefix.'_business_state',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'Postal Code',
+						'desc' => '',
+						'id' => $this->prefix.'_business_zip',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'Country',
+						'desc' => 'Use the 2-letter or 3-letter country code such as "USA"',
+						'id' => $this->prefix.'_business_country',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'Telephone',
+						'desc' => 'Example: 520-555-5555 or (520) 555-5555',
+						'id' => $this->prefix.'_business_phone',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'Website URL',
+						'desc' => 'Example: http://www.gowebsolutions.com/',
+						'id' => $this->prefix.'_business_url',
+						'type' => 'text'
+					),
+					
+					array(
+						'name' => 'Product Name',
+						'desc' => '',
+						'id' => $this->prefix.'_product_name',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'Manufacturer/Brand of Product',
+						'desc' => '',
+						'id' => $this->prefix.'_product_brand',
+						'type' => 'text'
+					),
+					array(
+						'name' => 'Product ID',
+						'desc' => 'ONE of the following formats: <b>asin:1234567890</b>, <b>isbn:1234567890</b>, <b>upc:1234567890123</b> , <b>sku:ABC123</b>, <b>mpn:ABC123</b>',
+						'id' => $this->prefix.'_product_id',
+						'type' => 'text'
+					)
+				)
+			);
+		
+			$args = array('public' => true);
+			$post_types = get_post_types($args);
+			if (is_array($post_types) === false) {
+				$post_types = array();
+			}
+
+			unset($post_types['attachment']);
+			unset($post_types[$my_post_type]);
+			
+			foreach ($post_types as $post_type) {
+				add_meta_box( $this->meta_box_posts['id'], $this->meta_box_posts['title'], array(&$this, 'show_meta_box_fields'), $post_type, $this->meta_box_posts['context'], $this->meta_box_posts['priority'], array('type' => 'meta_box_posts') );
+			}
+		}
+	}
+	
+	function get_all_posts_pages($only_plugin_enabled_posts, $keyword, $skip, $limit) {
+		global $wpdb;
+
+		// using a direct query here because we only want specific fields, and this needs to be performant
+
+		$query = "
+			SELECT p.ID,p.post_title
+			FROM {$wpdb->posts} p
+			LEFT JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key = '{$this->prefix}_enable' AND pm.meta_value = '1'
+			WHERE p.post_type NOT IN ('attachment')
+			AND p.post_status IN ('publish','pending','draft','future','private','trash')";
 		
 		if ($only_plugin_enabled_posts) {
-			$args['meta_key'] = $this->prefix.'_enable';
-			$args['meta_value'] = '1';
+			$query .= "
+				AND pm.meta_value = '1'";
 		}
-		
-		$tmp = new WP_Query($args);		
-		return $tmp;
+
+		if ($keyword !== "") {
+			$keyword = '%' . esc_sql($keyword) . '%';
+
+			$query .= "
+				AND p.post_title LIKE '{$keyword}'";
+		}
+
+		$query .= "
+			ORDER BY p.post_title ASC";
+
+		if ($skip !== false && $limit !== false) {
+			$skip = intval($skip);
+			$limit = intval($limit);
+
+			$query .= " 
+				LIMIT $skip, $limit";
+		}
+
+		return $wpdb->get_results($query, OBJECT);
 	}
 	
 	// update = false for wp 3.6 support
@@ -719,10 +755,17 @@ class WPCustomerReviewsAdmin3 extends WPCustomerReviews3
 		$this->param($params);
 		
 		if ($this->p->_wpnonce !== '' && $this->p->bulk_edit === '') {
+			// we need to call my_add_meta_box here, since it does not run on every page for performance reasons
+			$this->my_add_meta_box($post->post_type, $post);
+
 			// update meta if changed, delete it if not set or blank
 			$types = array('meta_box_posts','meta_box_reviews'); // $this->meta_box_posts, $this->meta_box_reviews
 			foreach ($types as $type) {
-				$my_type = $this->$type; // $this->meta_box_posts, $this->meta_box_reviews				
+				$my_type = $this->$type; // $this->meta_box_posts, $this->meta_box_reviews
+
+				// if meta boxes have not been added by our plugin for the current post_type, continue
+				if (count($my_type) === 0) { continue; }
+
 				foreach ($my_type['fields'] as $field) {
 					$old = get_post_meta($post_id, $field['id'], true);
 					if (isset($this->p->{$field['id']})) {
@@ -765,7 +808,7 @@ class WPCustomerReviewsAdmin3 extends WPCustomerReviews3
 	}
 	
 	function admin_filter_custom_review_columns($columns) {
-		$columns[$this->prefix.'_review_post'] = 'Reviewed Post';
+		$columns[$this->prefix.'_review_post'] = 'Reviewed Post / Page';
 		$columns[$this->prefix.'_review_rating'] = 'Rating';
 		return $columns;
 	}
@@ -810,22 +853,65 @@ class WPCustomerReviewsAdmin3 extends WPCustomerReviews3
         $where .= " AND ID IN (SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='{$this->prefix}_review_post' AND meta_value = {$filterVal})";		
 		return $where;
 	}
+
+	function ajax_enabled_posts() {
+		header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+		header("Cache-Control: post-check=0, pre-check=0", false);
+		header("Pragma: no-cache");
+		header('Content-type: application/json');
+		
+		$this->param(array('term', 'page'));
+
+		$page = $this->p->page;
+		if ($page === "") { $page = 1; }
+		$page = intval($page);
+		$limit = 100;
+		$skip = ($page * $limit) - $limit;
+		
+		$rtn = new stdClass();
+		$rtn->results = array();
+		$rtn->pagination = new stdClass();
+
+		$posts = $this->get_all_posts_pages(true, $this->p->term, $skip, $limit);
+		$rtn->pagination->more = (count($posts) === $limit);
+
+		foreach ($posts as $post) {
+			$tmp = new stdClass();
+			$tmp->id = $post->ID;
+			$tmp->text = $post->post_title;
+			$rtn->results[] = $tmp;
+		}
+		unset($posts);
+		
+		die(json_encode($rtn));
+	}
 	
 	function review_filter_list() {
 		$screen = get_current_screen();
 		if ($screen->post_type !== $this->prefix.'_review') { return; }
-		
-		$name = $this->prefix."_reviews_post_filter";
-		$getName = (isset($_GET[$name])) ? intval($_GET[$name]) : 0;
+
+		$filterName = "wpcr3_reviews_post_filter";
+
+		$this->param(array($filterName));
+		$getPostID = ($this->p->wpcr3_reviews_post_filter !== "") ? intval($this->p->wpcr3_reviews_post_filter) : "";
 		?>
-		<select name="<?php echo $name; ?>" id="<?php echo $name;?>">
-			<option>All Posts / Pages</option>
-			<?php
-			$tmpPosts = $this->get_all_posts_pages(true);
-			foreach ($tmpPosts->posts as $p) : ?>
-				<option <?php if ($p->ID === $getName) { echo "selected"; } ?> value="<?php echo $p->ID; ?>"><?php echo $p->post_title; ?></option>
-			<?php endforeach; ?>
+		<select style="width:450px;" name="<?php echo $filterName; ?>" id="<?php echo $filterName;?>">
+			<option></option>
+			<?php if ($getPostID !== "") : ?>
+				<option selected="selected" value="<?php echo $getPostID; ?>"><?php echo get_the_title($getPostID); ?></option>
+			<?php endif; ?>
 		</select>
+		<script>
+			jQuery('#<?php echo $filterName; ?>').wpcr3_select({
+				ajax : {
+					url : '<?php echo admin_url('admin-ajax.php'); ?>?action=wpcr3_enabled_posts',
+					dataType : 'json',
+					delay : 250 // 250ms debounce
+				},
+				placeholder : 'All Posts / Pages',
+				allowClear : true
+			});
+		</script>
 		<?php
 	}
 	/* end custom columns filters */
@@ -854,11 +940,37 @@ class WPCustomerReviewsAdmin3 extends WPCustomerReviews3
 					echo '<textarea name="', $field['id'], '" id="', $field['id'], '" cols="60" rows="4" style="width:97%">', $meta ? $meta : $field['default'], '</textarea>';
 					break;
 				case 'select':
-					echo '<select name="', $field['id'], '" id="', $field['id'], '">';
+				case 'select2':
+					echo '<select style="width:97%;" name="', $field['id'], '" id="', $field['id'], '">';
+
+					if ($field['type'] === 'select2') {
+						if (isset($field['typeOptions']['select2']['placeholder'])) {
+							echo '<option></option>';
+						}
+
+						if (isset($field['typeOptions']['selected_label_function'])) {
+							if ($meta) {
+								$selected_label_function = $field['typeOptions']['selected_label_function'];
+								// meta is postID
+								$post_title = call_user_func(array($this,$selected_label_function), $meta); 
+								$field['options'] = array($meta => $post_title);
+							}
+						}
+					}
+
 					foreach ($field['options'] as $value => $label) {
 						echo '<option value="'.$value.'" ', $meta == $value ? ' selected="selected"' : '', '>', $label, '</option>';
 					}
 					echo '</select>';
+
+					if ($field['type'] === 'select2') {
+						?>
+						<script>
+							jQuery('#<?php echo $field['id']; ?>').wpcr3_select(<?php echo json_encode($field['typeOptions']['select2']); ?>);
+						</script>
+						<?php
+					}
+
 					break;
 				case 'checkbox':
 					echo '<input value="1" type="checkbox" name="', $field['id'], '" id="', $field['id'], '"', $meta ? ' checked="checked"' : '', ' />';
@@ -873,15 +985,18 @@ class WPCustomerReviewsAdmin3 extends WPCustomerReviews3
 
 	/* some admin styles can override normal styles for inplace edits */
 	function enqueue_admin_stuff() {
+		global $pagenow;
+
 		$pluginurl = $this->getpluginurl();
 
-		$params = array('page','post','post_type');
+		$params = array('page', 'post_type');
 		$this->param($params);
 		
-		if ($this->p->post !== '' || $this->p->post_type !== '' || $this->p->page == $this->options_url_slug) {
-			wp_register_script('wp-customer-reviews-admin',$pluginurl.'js/wp-customer-reviews-admin.js',array('jquery'),$this->plugin_version);
-			wp_register_style('wp-customer-reviews-admin',$pluginurl.'css/wp-customer-reviews-admin.css',array(),$this->plugin_version);  
+		if ($pagenow === 'post.php' || $pagenow === 'post-new.php' || $this->p->post_type === "wpcr3_review" || $this->p->page == $this->options_url_slug) {
+			wp_register_script('wp-customer-reviews-admin', $pluginurl.'js/wp-customer-reviews-admin.js', array('jquery'), $this->plugin_version);
 			wp_enqueue_script('wp-customer-reviews-admin');
+
+			wp_register_style('wp-customer-reviews-admin', $pluginurl.'css/wp-customer-reviews-admin.css', array(), $this->plugin_version);
 			wp_enqueue_style('wp-customer-reviews-admin');
 		}
 	}
@@ -995,20 +1110,13 @@ class WPCustomerReviewsAdmin3 extends WPCustomerReviews3
 
 		add_settings_error($this->prefix.'_updateoptions', $this->prefix.'_updateoptions', 'Your settings have been saved.', 'updated');
 		settings_errors($this->prefix.'_updateoptions');
-    }
-	
-    function my_get_pages() { /* gets pages, even if hidden using a plugin */
-        global $wpdb;
-        
-        $res = $wpdb->get_results("SELECT `ID`,`post_title` FROM `$wpdb->posts` WHERE `post_status` = 'publish' AND `post_type` = 'page' ORDER BY `ID`");
-        return $res;
-    }
-    
-    function security() {
-        if (!current_user_can('manage_options')) {
-            wp_die( __('You do not have sufficient permissions to access this page.') );
-        }
-    }
+	}
+
+	function security() {
+		if (!current_user_can('manage_options')) {
+			wp_die( __('You do not have sufficient permissions to access this page.') );
+		}
+	}
 	
 	function tab_about() {
 		?>
@@ -1104,7 +1212,7 @@ class WPCustomerReviewsAdmin3 extends WPCustomerReviews3
 						PAGINATE="<span>0</span>" will disable pagination of reviews.<br />
 						PERPAGE="<span>10</span>" will show 10 reviews at a time.<br />
 						SHOWFORM="<span>1</span>" will show the form to add a new review. This only works if POSTID is not set to "ALL".<br />
-						<!--HIDEREVIEWS="<span>1</span>" will hide the review output and just display the average rating stars. This only works if POSTID is not set to "ALL". <span class="boldRed">Available in Pro Version Only.</span><br />-->
+						HIDEREVIEWS="<span>1</span>" will hide the review output. Can be used to show the form only.<br />
 						HIDERESPONSE="<span>1</span>" will hide the admin response to all reviews.<br />
 						SNIPPET="<span>140</span>" will only show the first 140 characters of a review.<br />
 						MORE="<span>view more</span>" will show "... view more" with a link to the review. Only displayed when the review has been trimmed using SNIPPET.<br />

@@ -5,10 +5,12 @@ If you have the Pro version, you can edit this file via plugin settings without 
 ---%
 <div class='wpcr3_respond_1 {{classes}}' data-ajaxurl='{{ajaxurl}}' data-on-postid='{{on_postid}}' data-postid='{{postid}}'>
 	{{review_form}}
-	<div class="wpcr3_reviews_holder">
-		{{reviews}}
-	</div>
-	{{pagination}}
+	{{!hidereviews}}
+		<div class="wpcr3_reviews_holder">
+			{{reviews}}
+		</div>
+		{{pagination}}
+	{{/hidereviews}}
 	{{:power}}
 		<div class="wpcr3_clear wpcr3_power">
 			{{power}}
