@@ -27,9 +27,27 @@
 			</nav><!-- .footer-navigation -->
 		<?php endif; ?>
 		<div class="site-info">
-			<?php
-			printf( esc_html__( '&copy; %1$s All Rights Reserved', 'oceanica-lite' ), ( new DateTime )->format( "Y" ) );
-			?>
+			<div id="footer-columns">
+	<div>
+		<h2 class="title">About Us</h2>
+		<ul class="list-unstyled">
+		<li>South East Glamping,</li>
+		<li>123 Street, Co Wexford, Ireland</li>
+		<li>+353 (0)87 1234567</li>
+		<li>info@southeastglamping.com</li>
+		<li><a href="http://localhost:8888/wordpress/about/" rel="noopener" target="_blank">Click here for more details about us</a></li>
+		</ul>
+	</div>
+	<div>
+		<h2 class="title">Disclaimer</h2>
+	<p>This website and all accompanying data, facts and functionality associated with this website are for demonstrative purposes only. The sole purpose of this website is to meet the requirements for the assessment of the masters module User Experience and Design for the MSc Enterprise Software Systems course in W.I.T. For more information please see the following <a href="http://localhost:8888/wordpress/disclaimer/" rel="noopener" target="_blank">page</a></p>
+	
+	</div>
+	<div style="clear:both">
+</div>
+<div id="copyright-center">
+<center>© Copyright 2018. South East Glamping.</center>
+</div>
 		</div><!-- .site-info -->
 	</div><!-- .wrapper -->
 </footer><!-- #colophon -->
