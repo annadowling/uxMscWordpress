@@ -107,12 +107,12 @@ $current_page_id = isset( $_REQUEST['current_page_id'] ) ? absint( $_REQUEST['cu
 		<?php if ( opalhotel_get_option( 'search_enable_room_type', 1 ) ) : ?>
 
 			<div class="opalhotel-form-field">
-				<label class="opalhotel-form-lable"><?php esc_html_e( 'Room Type', 'opal-hotel-room-booking' ); ?></label>
+				<label class="opalhotel-form-lable"><?php esc_html_e( 'Booking Type', 'opal-hotel-room-booking' ); ?></label>
 				<div class="opalhotel-form-field-group">
 					<?php
 						printf( '%s', opalhotel_select_room_types(array(
 								'name'			=> 'room_type',
-								'placeholder'	=> __( 'Select Room Type', 'opal-hotel-room-booking' ),
+								'placeholder'	=> __( 'Select Booking Type', 'opal-hotel-room-booking' ),
 								'selected'		=> $room_type_selected
 							)) );
 					?>

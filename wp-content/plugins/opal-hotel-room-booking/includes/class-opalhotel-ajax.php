@@ -230,7 +230,7 @@ class OpalHotel_Ajax {
 		} else if ( $step === 3 && OpalHotel()->cart->is_empty() ) {
 			$results = array(
 				'status' 	=> false,
-				'message'	=> __( 'Can not make a reservation. You have not selected any room.', 'opal-hotel-room-booking' )
+				'message'	=> __( 'Can not make a reservation. You have not selected anything to book. Click on show rates beside your selected booking in order to complete this reservation.', 'opal-hotel-room-booking' )
 			);
 		} else {
 			ob_start();

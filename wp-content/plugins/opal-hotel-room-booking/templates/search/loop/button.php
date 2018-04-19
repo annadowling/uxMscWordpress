@@ -27,4 +27,4 @@ $departure = isset( $_REQUEST['departure_datetime'] ) ? sanitize_text_field( $_R
 <input type="hidden" name="id" value="<?php echo esc_attr( get_the_ID() ) ?>" />
 <input type="hidden" name="action" value="opalhotel_add_to_cart" />
 <input type="hidden" name="is_hotel" value="<?php echo esc_attr( is_singular( OPALHOTEL_CPT_HOTEL ) || ( isset( $_REQUEST['hotel_id'] ) && $_REQUEST['hotel_id'] ) ? 1 : 0 ) ?>" />
-<button type="subbmit" class="button opalhotel-button-submit button-primary-inverse button-block"><?php esc_html_e( 'Book This Room', 'opal-hotel-room-booking' ); ?></button>
+<button type="subbmit" class="button opalhotel-button-submit button-primary-inverse button-block"><?php esc_html_e( 'Book Now', 'opal-hotel-room-booking' ); ?></button>

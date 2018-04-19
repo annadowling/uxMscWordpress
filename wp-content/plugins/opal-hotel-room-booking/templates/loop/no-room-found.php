@@ -5,4 +5,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-<?php opalhotel_print_notice_message( esc_html( 'No rooms found in our system.', 'opal-hotel-room-booking' ) ); ?>
+<?php opalhotel_print_notice_message( esc_html( 'No availability found in our system. Try another date range.', 'opal-hotel-room-booking' ) ); ?>

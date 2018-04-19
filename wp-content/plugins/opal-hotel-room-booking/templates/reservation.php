@@ -19,7 +19,7 @@ $steps = apply_filters( 'opalhotel_reservation_steps', array(
 				'callback'	=> 'opalhotel_calendar_search_template_step'
 			),
 		2		=> array(
-				'label'		=> __( 'Choose Room', 'opal-hotel-room-booking' ),
+				'label'		=> __( 'Choose Booking', 'opal-hotel-room-booking' ),
 				'callback'	=> 'opalhotel_search_results_template_step'
 			),
 		3		=> array(

@@ -36,7 +36,7 @@ $current_page_id = isset( $_REQUEST['current_page_id'] ) ? absint( $_REQUEST['cu
 	<form action="<?php echo esc_attr( opalhotel_get_reservation_url() ) ?>" method="GET" name="opalhotel_check_availability" class="opalhotel_check_availability opalhotel_datepick_wrap">
 		<div class="horizontal-form clearfix">
 			<header class="heading-form">
-				<h3><?php esc_html_e( 'Book', 'opal-hotel-room-booking' ) ?> <span><?php esc_html_e( 'A Room', 'opal-hotel-room-booking' ) ?></span></h3>
+				<h3><?php esc_html_e( 'Quick', 'opal-hotel-room-booking' ) ?> <span><?php esc_html_e( 'Book', 'opal-hotel-room-booking' ) ?></span></h3>
 			</header>
 			<div class="form-content">
 				<!-- before hook -->
@@ -116,12 +116,12 @@ $current_page_id = isset( $_REQUEST['current_page_id'] ) ? absint( $_REQUEST['cu
 				<?php if ( opalhotel_get_option( 'search_enable_room_type', 1 ) ) : ?>
 
 					<div class="opalhotel-form-field room-type-input">
-						<label class="opalhotel-form-lable"><?php esc_html_e( 'Room Type', 'opal-hotel-room-booking' ); ?></label>
+						<label class="opalhotel-form-lable"><?php esc_html_e( 'Booking Type', 'opal-hotel-room-booking' ); ?></label>
 						<div class="opalhotel-form-field-group">
 							<?php
 								printf( '%s', opalhotel_select_room_types(array(
 										'name'			=> 'room_type',
-										'placeholder'	=> __( 'Select Room Type', 'opal-hotel-room-booking' ),
+										'placeholder'	=> __( 'Select Booking Type', 'opal-hotel-room-booking' ),
 										'selected'		=> $room_type_selected
 									)) );
 							?>

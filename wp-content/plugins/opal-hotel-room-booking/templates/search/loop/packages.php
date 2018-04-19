@@ -50,36 +50,10 @@ $child = isset( $_REQUEST['child'] ) ? absint( $_REQUEST['child'] ) : 0;
 							$options[$i] = $i;
 							$options_attr[$i] = isset( $extra_adults[$i] ) ? $extra_adults[$i] : 0;
 						endfor;
-
-						// opalhotel_print_select( array(
-						// 		'options'	=> $options,
-						// 		'options_attr'=> $options_attr,
-						// 		'selected'	=> $adult,
-						// 		'class'		=> array( 'people', 'select-price' ),
-						// 		'id'		=> 'adult'
-						// 	) );
 					?>
 					<select name="adult" class="people select-price opalhotel-select">
 						<?php for ( $i = 1; $i <= $max_adult; $i++ ) : ?>
 							<option value="<?php echo esc_attr( $i ); ?>" <?php selected( $adult, $i ); ?> data-value="<?php echo esc_attr( isset( $extra_adults[$i] ) ? $extra_adults[$i] : 0 ) ?>"><?php echo absint( $i ); ?></option>
-						<?php endfor; ?>
-					</select>
-				</h6>
-			</div>
-		</div>
-		<div class="opalhotel-room-package-item grid-row">
-			<div class="clearfix grid-column-6 grid-column">
-				<h6 class="package-title pull-left">
-					<span for="package-id-<?php echo esc_attr( $room->id ) ?>">
-						<?php esc_html_e( 'Children', 'opal-hotel-room-booking' ); ?>
-					</span>
-				</h6>
-			</div>
-			<div class="clearfix grid-column-6 grid-column">
-				<h6 class="package-title pull-left">
-					<select name="child" class="people select-price opalhotel-select">
-						<?php for ( $i = 0; $i <= $max_child; $i++ ) : ?>
-							<option value="<?php echo esc_attr( $i ); ?>" <?php selected( $child, $i ); ?> data-value="<?php echo esc_attr( isset( $extra_child[$i] ) ? $extra_child[$i] : 0 ) ?>"><?php echo absint( $i ); ?></option>
 						<?php endfor; ?>
 					</select>
 				</h6>

@@ -108,6 +108,6 @@ $base_price = $room->base_price() * $night;
 
 </div>
 <a href="#room-packages-<?php echo esc_attr( $room->id ); ?>" class="opalhotel-room-toggle-packages opalhotel-button btn btn-default btn-block">
-	<span><?php esc_html_e( 'Show Rates', 'opal-hotel-room-booking' ); ?></span>
+	<span><?php esc_html_e( 'Click here to Add People and Book', 'opal-hotel-room-booking' ); ?></span>
 	<i class="fa"></i>
 </a>
