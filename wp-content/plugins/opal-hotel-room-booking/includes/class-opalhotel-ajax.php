@@ -1,5 +1,5 @@
 <?php
-/**
+/** 
  * $Desc$
  *
  * @version    $Id$
@@ -230,7 +230,7 @@ class OpalHotel_Ajax {
 		} else if ( $step === 3 && OpalHotel()->cart->is_empty() ) {
 			$results = array(
 				'status' 	=> false,
-				'message'	=> __( 'Can not make a reservation. You have not selected anything to book. Click on show rates beside your selected booking in order to complete this reservation.', 'opal-hotel-room-booking' )
+				'message'	=> __( 'Oops! You have not selected anything to book. Click Add to Cart beside a booking of your choice in order to complete your reservation.', 'opal-hotel-room-booking' )
 			);
 		} else {
 			ob_start();

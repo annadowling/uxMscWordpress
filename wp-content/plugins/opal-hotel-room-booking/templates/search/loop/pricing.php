@@ -26,6 +26,13 @@ $room = opalhotel_get_room( get_the_ID() );
 $qty = ! empty( $_REQUEST['number_of_rooms'] ) ? absint( $_REQUEST['number_of_rooms'] ) : 1 ;
 $night = opalhotel_count_nights( strtotime( $arrival ), strtotime( $departure ) );
 $base_price = $room->base_price() * $night;
+
+$action_url = add_query_arg( array(
+			'add-to-cart'		=> 1
+		), opalhotel_get_available_url() );
+
+/* get packages */
+$packages = $room->get_packages();
 ?>
 <a href="#opalhotel-modal-pricing-<?php echo esc_attr( $room->id ); ?>" class="opalhotel-view-price opalhotel-fancybox"><?php esc_html_e( 'Price Details', 'opal-hotel-room-booking' ); ?></a>
 <div class="opalhotel-modal-pricing" style="display:none" id="opalhotel-modal-pricing-<?php echo esc_attr( $room->id ); ?>">
@@ -107,7 +114,13 @@ $base_price = $room->base_price() * $night;
 	</div>
 
 </div>
-<a href="#room-packages-<?php echo esc_attr( $room->id ); ?>" class="opalhotel-room-toggle-packages opalhotel-button btn btn-default btn-block">
-	<span><?php esc_html_e( 'Click here to Add People and Book', 'opal-hotel-room-booking' ); ?></span>
-	<i class="fa"></i>
-</a>
+</br>
+<form method="POST" action="">
+<?php wp_nonce_field( 'opalhotel_add_to_cart', 'opalhotel-add_to-cart' ); ?>
+<input type="hidden" name="arrival" value="<?php echo esc_attr( $arrival ) ?>" />
+<input type="hidden" name="departure" value="<?php echo esc_attr( $departure ) ?>" />
+<input type="hidden" name="id" value="<?php echo esc_attr( $room->id ) ?>" />
+<input type="hidden" name="action" value="opalhotel_add_to_cart" />
+<input type="hidden" name="is_hotel" value="<?php echo esc_attr( is_singular( OPALHOTEL_CPT_HOTEL ) || ( isset( $_REQUEST['hotel_id'] ) && $_REQUEST['hotel_id'] ) ? 1 : 0 ) ?>" />
+<button type="subbmit" class="button opalhotel-button-submit button-primary-inverse button-block"><?php esc_html_e( 'Add to Cart', 'opal-hotel-room-booking' ); ?></button>
+</form>

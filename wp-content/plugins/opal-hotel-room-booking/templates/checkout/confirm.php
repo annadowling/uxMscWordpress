@@ -13,5 +13,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <h4>
-	<?php esc_html_e( 'You have no room selected.', 'opal-hotel-room-booking' ); ?>
+	<?php esc_html_e( 'You have not selected anything to book.', 'opal-hotel-room-booking' ); ?>
 </h4>

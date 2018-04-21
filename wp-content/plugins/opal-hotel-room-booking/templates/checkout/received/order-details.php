@@ -30,7 +30,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 			<div class="opalhotel_order_item_room_info">
 				<span class="adult"><?php printf( __( 'Adult: %d' ), $room->adult ) ?></span>
-				<span class="children"><?php printf( __( 'Children: %d' ), $room->child ) ?></span>
 			</div>
 			<?php if ( $packages = $order->get_room_packages( $room->order_item_id ) ) : ?>
 				<div class="opalhotel_reservation_packages">
